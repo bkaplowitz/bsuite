@@ -49,6 +49,6 @@ def map_mpi(
   progress_bar = tqdm.tqdm(total=num_experiments)
 
   for bsuite_id in pool.map(run_fn, bsuite_ids):
-    description = '[Last finished: {}]'.format(bsuite_id)
+    description = f'[Last finished: {bsuite_id}]'
     progress_bar.set_description(termcolor.colored(description, color='green'))
     progress_bar.update()

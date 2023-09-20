@@ -82,5 +82,4 @@ class Replay:
                   for x in as_array]
 
   def __repr__(self):
-    return 'Replay: size={}, capacity={}, num_added={}'.format(
-        self.size, self._capacity, self._num_added)
+    return f'Replay: size={self.size}, capacity={self._capacity}, num_added={self._num_added}'

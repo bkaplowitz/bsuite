@@ -107,17 +107,16 @@ class WrapperTest(absltest.TestCase):
     # We count the number of transitions, hence the -1.
     expected_episode_length = len(timesteps) - 1
 
-    expected_calls = []
-    for i in range(1, num_episodes + 1):
-      expected_calls.append(
-          mock.call(dict(
-              steps=expected_episode_length * i,
-              episode=i,
-              total_return=expected_episode_return * i,
-              episode_len=expected_episode_length,
-              episode_return=expected_episode_return,
-              ))
-          )
+    expected_calls = [
+        mock.call(
+            dict(
+                steps=expected_episode_length * i,
+                episode=i,
+                total_return=expected_episode_return * i,
+                episode_len=expected_episode_length,
+                episode_return=expected_episode_return,
+            )) for i in range(1, num_episodes + 1)
+    ]
     mock_logger.write.assert_has_calls(expected_calls)
 
   def test_unwrap(self):

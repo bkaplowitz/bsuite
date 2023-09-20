@@ -96,17 +96,16 @@ def _make_baseline(plt_df: pd.DataFrame,
   """Generate baseline 2^N data for each combination of sweep_vars."""
   x = np.arange(5, 20)
   baseline = pd.DataFrame(dict(size=x, episode=2**x))
-  if sweep_vars:
-    params = plt_df.groupby(sweep_vars).size().reset_index().drop(0, axis=1)
-    data = []
-    for _, row in params.iterrows():
-      tmp = baseline.copy()
-      for col, val in row.iteritems():
-        tmp[col] = val
-      data.append(tmp)
-    return pd.concat(data, sort=True)
-  else:
+  if not sweep_vars:
     return baseline
+  params = plt_df.groupby(sweep_vars).size().reset_index().drop(0, axis=1)
+  data = []
+  for _, row in params.iterrows():
+    tmp = baseline.copy()
+    for col, val in row.iteritems():
+      tmp[col] = val
+    data.append(tmp)
+  return pd.concat(data, sort=True)
 
 
 def _base_scaling(plt_df: pd.DataFrame,

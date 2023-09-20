@@ -91,8 +91,7 @@ class Logger(base.Logger):
     if self._insert_statement is None:
       # Create a parameterized insert statement.
       placeholders = ', '.join(['?'] * len(data))
-      self._insert_statement = 'insert into {} values ({}, {})'.format(
-          self._experiment_name, self._setting_index, placeholders)
+      self._insert_statement = f'insert into {self._experiment_name} values ({self._setting_index}, {placeholders})'
 
     with self._connection:
       try:
@@ -100,10 +99,8 @@ class Logger(base.Logger):
                                  [data[key] for key in self._keys])
       except sqlite3.IntegrityError:
         raise RuntimeError(
-            ('Caught SQL integrity error. This is probably caused by attempting'
-             ' to overwrite existing rows in table "{}" in database at {}.'
-             ' You may want to specify a different database file.').format(
-                 self._experiment_name, self._db_path))
+            f'Caught SQL integrity error. This is probably caused by attempting to overwrite existing rows in table "{self._experiment_name}" in database at {self._db_path}. You may want to specify a different database file.'
+        )
 
   def _maybe_create_table(self, data: Mapping[str, Any]):
     """Creates a table for this experiment, if it does not already exist."""

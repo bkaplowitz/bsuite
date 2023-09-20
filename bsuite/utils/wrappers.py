@@ -128,9 +128,7 @@ class Logging(dm_env.Environment):
   def raw_env(self):
     # Recursively unwrap until we reach the true 'raw' env.
     wrapped = self._env
-    if hasattr(wrapped, 'raw_env'):
-      return wrapped.raw_env
-    return wrapped
+    return wrapped.raw_env if hasattr(wrapped, 'raw_env') else wrapped
 
   def __getattr__(self, attr):
     """Delegate attribute access to underlying environment."""
@@ -189,7 +187,7 @@ def _small_state_to_image(shape: Sequence[int],
   elif size == 2:
     result[:, :shape[1] // 2] = flattened[0]
     result[:, shape[1] // 2:] = flattened[1]
-  elif size == 3 or size == 4:
+  elif size in [3, 4]:
     # Top-left.
     result[:shape[0] // 2, :shape[1] // 2] = flattened[0]
     # Top-right.
@@ -243,8 +241,8 @@ def to_image(shape: Sequence[int], observation: np.ndarray) -> np.ndarray:
     return _interpolate_to_image(shape, observation)
   else:
     raise ValueError(
-        'Cannot convert observation shape {} to desired shape {}'.format(
-            observation.shape, shape))
+        f'Cannot convert observation shape {observation.shape} to desired shape {shape}'
+    )
 
 
 class RewardNoise(environments.Environment):
@@ -292,9 +290,7 @@ class RewardNoise(environments.Environment):
   def raw_env(self):
     # Recursively unwrap until we reach the true 'raw' env.
     wrapped = self._env
-    if hasattr(wrapped, 'raw_env'):
-      return wrapped.raw_env
-    return wrapped
+    return wrapped.raw_env if hasattr(wrapped, 'raw_env') else wrapped
 
   def _step(self, action: int) -> dm_env.TimeStep:
     raise NotImplementedError('Please call step() instead of _step().')
@@ -361,9 +357,7 @@ class RewardScale(environments.Environment):
   def raw_env(self):
     # Recursively unwrap until we reach the true 'raw' env.
     wrapped = self._env
-    if hasattr(wrapped, 'raw_env'):
-      return wrapped.raw_env
-    return wrapped
+    return wrapped.raw_env if hasattr(wrapped, 'raw_env') else wrapped
 
   def bsuite_info(self) -> Dict[str, Any]:
     return self._env.bsuite_info()

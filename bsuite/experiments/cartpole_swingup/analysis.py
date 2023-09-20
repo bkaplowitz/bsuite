@@ -58,14 +58,13 @@ def plot_learning(df: pd.DataFrame,
                   sweep_vars: Optional[Sequence[str]] = None) -> gg.ggplot:
   """Plots the average return through time by cartpole swingup."""
   df = cp_swingup_preprocess(df_in=df)
-  p = plotting.plot_regret_group_nosmooth(
+  return plotting.plot_regret_group_nosmooth(
       df_in=df,
       group_col='height_threshold',
       sweep_vars=sweep_vars,
       regret_col='perfection_regret',
       max_episode=sweep.NUM_EPISODES,
   )
-  return p
 
 
 def plot_scale(df: pd.DataFrame,
@@ -78,16 +77,16 @@ def plot_scale(df: pd.DataFrame,
     group_vars += sweep_vars
   plt_df = df.groupby(group_vars)['best_episode'].max().reset_index()
 
-  p = (gg.ggplot(plt_df)
-       + gg.aes(x='factor(height_threshold)', y='best_episode',
-                colour='best_episode > {}'.format(GOOD_EPISODE))
-       + gg.geom_point(size=5, alpha=0.8)
-       + gg.scale_colour_manual(values=['#d73027', '#313695'])
-       + gg.geom_hline(gg.aes(yintercept=0.0), alpha=0)  # axis hack
-       + gg.scale_x_discrete(breaks=[0, 0.25, 0.5, 0.75, 1.0])
-       + gg.ylab('best return in first {} episodes'.format(NUM_EPISODES))
-       + gg.xlab('height threshold')
-      )
+  p = ((gg.ggplot(plt_df) + gg.aes(
+      x='factor(height_threshold)',
+      y='best_episode',
+      colour=f'best_episode > {GOOD_EPISODE}',
+  )) + gg.geom_point(size=5, alpha=0.8) +
+       gg.scale_colour_manual(values=['#d73027', '#313695']) +
+       gg.geom_hline(gg.aes(yintercept=0.0), alpha=0) +
+       gg.scale_x_discrete(breaks=[0, 0.25, 0.5, 0.75, 1.0]) +
+       gg.ylab(f'best return in first {NUM_EPISODES} episodes') +
+       gg.xlab('height threshold'))
   return plotting.facet_sweep_plot(p, sweep_vars)
 
 

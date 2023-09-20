@@ -15,6 +15,7 @@
 # ============================================================================
 """Logging functionality for CSV-based experiments."""
 
+
 import os
 from typing import Any, Mapping
 
@@ -28,7 +29,7 @@ import pandas as pd
 
 SAFE_SEPARATOR = '-'
 INITIAL_SEPARATOR = '_-_'
-BSUITE_PREFIX = 'bsuite_id' + INITIAL_SEPARATOR
+BSUITE_PREFIX = f'bsuite_id{INITIAL_SEPARATOR}'
 
 
 def wrap_environment(env: environments.Environment,

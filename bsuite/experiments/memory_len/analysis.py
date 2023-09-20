@@ -79,8 +79,9 @@ def plot_scale(df: pd.DataFrame,
       sweep_vars=sweep_vars,
       regret_col='regret_ratio'
   )
-  return p + gg.ylab('% correct episodes after\n{} episodes compared to random'
-                     .format(sweep.NUM_EPISODES))
+  return p + gg.ylab(
+      f'% correct episodes after\n{sweep.NUM_EPISODES} episodes compared to random'
+  )
 
 
 def plot_seeds(df_in: pd.DataFrame,

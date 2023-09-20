@@ -138,7 +138,7 @@ def space2spec(space: gym.Space, name: Optional[str] = None):
     return {key: space2spec(value, name) for key, value in space.spaces.items()}
 
   else:
-    raise ValueError('Unexpected gym space: {}'.format(space))
+    raise ValueError(f'Unexpected gym space: {space}')
 
 
 class DMEnvFromGym(dm_env.Environment):
@@ -165,14 +165,12 @@ class DMEnvFromGym(dm_env.Environment):
     observation, reward, done, info = self.gym_env.step(action)
     self._reset_next_step = done
 
-    if done:
-      is_truncated = info.get('TimeLimit.truncated', False)
-      if is_truncated:
-        return dm_env.truncation(reward, observation)
-      else:
-        return dm_env.termination(reward, observation)
-    else:
+    if not done:
       return dm_env.transition(reward, observation)
+    if is_truncated := info.get('TimeLimit.truncated', False):
+      return dm_env.truncation(reward, observation)
+    else:
+      return dm_env.termination(reward, observation)
 
   def close(self):
     self.gym_env.close()

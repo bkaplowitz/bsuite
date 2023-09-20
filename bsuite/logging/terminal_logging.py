@@ -69,6 +69,4 @@ def value_format(value: Any) -> str:
   """Convenience function for string formatting."""
   if isinstance(value, numbers.Integral):
     return str(value)
-  if isinstance(value, numbers.Number):
-    return f'{value:0.4f}'
-  return str(value)
+  return f'{value:0.4f}' if isinstance(value, numbers.Number) else str(value)

@@ -46,12 +46,11 @@ def _mapping_seed_compatibility(df: pd.DataFrame) -> pd.DataFrame:
     if np.any(nan_seeds):
       df.loc[nan_seeds, 'mapping_seed'] = df.loc[nan_seeds, 'seed']
       print('WARNING: seed renamed to "mapping_seed" for compatibility.')
+  elif 'seed' in df.columns:
+    print('WARNING: seed renamed to "mapping_seed" for compatibility.')
+    df['mapping_seed'] = df.seed
   else:
-    if 'seed' in df.columns:
-      print('WARNING: seed renamed to "mapping_seed" for compatibility.')
-      df['mapping_seed'] = df.seed
-    else:
-      print('ERROR: outdated bsuite run, please relaunch.')
+    print('ERROR: outdated bsuite run, please relaunch.')
   return df
 
 

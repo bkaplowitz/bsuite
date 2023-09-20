@@ -15,14 +15,13 @@
 # ============================================================================
 """Sweep definition for catch_scale experiment."""
 
+
 from bsuite.experiments.catch import sweep as catch_sweep
 
 NUM_EPISODES = catch_sweep.NUM_EPISODES
 
 _settings = []
 for scale in [0.001, 0.03, 1.0, 30., 1000.]:
-  for seed in range(4):
-    _settings.append({'reward_scale': scale, 'seed': None})
-
+  _settings.extend({'reward_scale': scale, 'seed': None} for _ in range(4))
 SETTINGS = tuple(_settings)
 TAGS = ('scale', 'credit_assignment')

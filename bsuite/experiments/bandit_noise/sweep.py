@@ -15,14 +15,17 @@
 # ============================================================================
 """Sweep definition for bandit_noise experiment."""
 
+
 from bsuite.experiments.bandit import sweep as bandit_sweep
 
 NUM_EPISODES = bandit_sweep.NUM_EPISODES
 
 _settings = []
 for scale in [0.1, 0.3, 1.0, 3., 10.]:
-  for n in range(4):
-    _settings.append({'noise_scale': scale, 'seed': None, 'mapping_seed': n})
-
+  _settings.extend({
+      'noise_scale': scale,
+      'seed': None,
+      'mapping_seed': n
+  } for n in range(4))
 SETTINGS = tuple(_settings)
 TAGS = ('noise',)

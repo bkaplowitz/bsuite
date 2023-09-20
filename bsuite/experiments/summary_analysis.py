@@ -114,11 +114,7 @@ def _bsuite_score_single(df: pd.DataFrame,
   """Score the bsuite across all domains for a single agent."""
   data = []
   for env_name, env_data in df.groupby('bsuite_env'):
-    if env_name not in experiment_info:
-      if verbose:
-        print('WARNING: {}_score not found in load.py and so is excluded.'
-              .format(env_name))
-    else:
+    if env_name in experiment_info:
       b_summary = experiment_info[env_name]
       data.append({
           'bsuite_env': env_name,
@@ -127,6 +123,8 @@ def _bsuite_score_single(df: pd.DataFrame,
           'tags': str(b_summary.tags),
           'finished': _is_finished(env_data, b_summary.episode),
       })
+    elif verbose:
+      print(f'WARNING: {env_name}_score not found in load.py and so is excluded.')
   return pd.DataFrame(data)
 
 
@@ -166,11 +164,8 @@ def ave_score_by_tag(score_df: pd.DataFrame,
                      sweep_vars: Sequence[str]) -> pd.DataFrame:
   """Takes in a bsuite scored dataframe and summarizes by tags."""
   summary_fun = lambda x: _summarize_single_by_tag(x, list(ALL_TAGS), 'tags')
-  if sweep_vars:
-    summary_df = score_df.groupby(sweep_vars).apply(summary_fun).reset_index()
-  else:
-    summary_df = summary_fun(score_df)
-  return  summary_df
+  return (score_df.groupby(sweep_vars).apply(summary_fun).reset_index()
+          if sweep_vars else summary_fun(score_df))
 
 
 ################################################################################
@@ -277,10 +272,11 @@ def plot_single_experiment(
     print('WARNING: you have no bsuite summary data, please reload.')
     return
   env_df = summary_df[summary_df.bsuite_env == bsuite_env]
-  if len(env_df) == 0:  # pylint:disable=g-explicit-length-test
-    print('Warning, you have no data for bsuite_env={}'.format(bsuite_env))
-    print('Your dataframe only includes bsuite_env={}'
-          .format(summary_df.bsuite_env.unique()))
+  if len(env_df) == 0:# pylint:disable=g-explicit-length-test
+    print(f'Warning, you have no data for bsuite_env={bsuite_env}')
+    print(
+        f'Your dataframe only includes bsuite_env={summary_df.bsuite_env.unique()}'
+    )
     return
 
   df = _clean_bar_plot_data(env_df, sweep_vars)
@@ -288,8 +284,8 @@ def plot_single_experiment(
   p = _bar_plot_compare(df)
   plot_width = min(2 + n_agent, 12)
   p += gg.theme(figure_size=(plot_width, 6))
-  p += gg.ggtitle('bsuite score for {} experiment'.format(bsuite_env))
-  print('tags={}'.format(df.tags.iloc[0]))
+  p += gg.ggtitle(f'bsuite score for {bsuite_env} experiment')
+  print(f'tags={df.tags.iloc[0]}')
   return p
 
 

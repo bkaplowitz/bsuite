@@ -15,14 +15,17 @@
 # ============================================================================
 """Sweep definition for bandit_scale experiment."""
 
+
 from bsuite.experiments.bandit import sweep as bandit_sweep
 
 NUM_EPISODES = bandit_sweep.NUM_EPISODES
 
 _settings = []
 for scale in [0.001, 0.03, 1.0, 30., 1000.]:
-  for n in range(4):
-    _settings.append({'reward_scale': scale, 'seed': None, 'mapping_seed': n})
-
+  _settings.extend({
+      'reward_scale': scale,
+      'seed': None,
+      'mapping_seed': n
+  } for n in range(4))
 SETTINGS = tuple(_settings)
 TAGS = ('scale',)

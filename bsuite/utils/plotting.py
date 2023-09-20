@@ -69,9 +69,7 @@ def score_by_scaling(df: pd.DataFrame,
                      score_fn: Callable[[pd.DataFrame], float],
                      scaling_var: str) -> float:
   """Apply scoring function based on mean and std."""
-  scores = []
-  for _, sub_df in df.groupby(scaling_var):
-    scores.append(score_fn(sub_df))
+  scores = [score_fn(sub_df) for _, sub_df in df.groupby(scaling_var)]
   mean_score = np.clip(np.mean(scores), 0, 1)
   lcb_score = np.clip(np.mean(scores) - np.std(scores), 0, 1)
   return 0.5 * (mean_score + lcb_score)
@@ -99,8 +97,9 @@ def facet_sweep_plot(base_plot: gg.ggplot,
   elif n_hypers <= 12:
     fig_size = (15, 4 * np.divide(n_hypers, 3) + 1)
   else:
-    print('WARNING - comparing {} agents at once is more than recommended.'
-          .format(n_hypers))
+    print(
+        f'WARNING - comparing {n_hypers} agents at once is more than recommended.'
+    )
     fig_size = (15, 12)
 
   if tall_plot:
@@ -134,24 +133,30 @@ def plot_regret_learning(df_in: pd.DataFrame,
 
 def _plot_regret_single(df: pd.DataFrame) -> gg.ggplot:
   """Plots the average regret through time for single variable."""
-  p = (gg.ggplot(df)
-       + gg.aes(x='episode', y='average_regret')
-       + gg.geom_smooth(method=smoothers.mean, span=0.1, size=1.75, alpha=0.1,
-                        colour='#313695', fill='#313695'))
-  return p
+  return (gg.ggplot(df) + gg.aes(x='episode', y='average_regret') +
+          gg.geom_smooth(
+              method=smoothers.mean,
+              span=0.1,
+              size=1.75,
+              alpha=0.1,
+              colour='#313695',
+              fill='#313695',
+          ))
 
 
 def _plot_regret_group(df: pd.DataFrame, group_col: str) -> gg.ggplot:
   """Plots the average regret through time when grouped."""
   group_name = group_col.replace('_', ' ')
   df[group_name] = df[group_col].astype('category')
-  p = (gg.ggplot(df)
-       + gg.aes(x='episode', y='average_regret',
-                group=group_name, colour=group_name, fill=group_name)
-       + gg.geom_smooth(method=smoothers.mean, span=0.1, size=1.75, alpha=0.1)
-       + gg.scale_colour_manual(values=FIVE_COLOURS)
-       + gg.scale_fill_manual(values=FIVE_COLOURS))
-  return p
+  return (gg.ggplot(df) + gg.aes(
+      x='episode',
+      y='average_regret',
+      group=group_name,
+      colour=group_name,
+      fill=group_name,
+  ) + gg.geom_smooth(method=smoothers.mean, span=0.1, size=1.75, alpha=0.1) +
+          gg.scale_colour_manual(values=FIVE_COLOURS) +
+          gg.scale_fill_manual(values=FIVE_COLOURS))
 
 
 def plot_regret_group_nosmooth(df_in: pd.DataFrame,
@@ -185,9 +190,9 @@ def _preprocess_ave_regret(df_in: pd.DataFrame,
   group_vars = (sweep_vars or []) + [group_col]
   plt_df = (df[df.episode == episode]
             .groupby(group_vars)[regret_col].mean().reset_index())
-  if len(plt_df) == 0:  # pylint:disable=g-explicit-length-test
-    raise ValueError('Your experiment has not yet run the necessary {} episodes'
-                     .format(episode))
+  if len(plt_df) == 0:# pylint:disable=g-explicit-length-test
+    raise ValueError(
+        f'Your experiment has not yet run the necessary {episode} episodes')
   group_name = group_col.replace('_', ' ')
   plt_df[group_name] = plt_df[group_col].astype('category')
   plt_df['average_regret'] = plt_df[regret_col] / episode
@@ -202,12 +207,11 @@ def plot_regret_average(df_in: pd.DataFrame,
   """Bar plot the average regret at end of learning."""
   df = _preprocess_ave_regret(df_in, group_col, episode, sweep_vars, regret_col)
   group_name = group_col.replace('_', ' ')
-  p = (gg.ggplot(df)
-       + gg.aes(x=group_name, y='average_regret', fill=group_name)
-       + gg.geom_bar(stat='identity')
-       + gg.scale_fill_manual(values=FIVE_COLOURS)
-       + gg.ylab('average regret after {} episodes'.format(episode))
-      )
+  p = (gg.ggplot(df) +
+       gg.aes(x=group_name, y='average_regret', fill=group_name) +
+       gg.geom_bar(stat='identity') +
+       gg.scale_fill_manual(values=FIVE_COLOURS) +
+       gg.ylab(f'average regret after {episode} episodes'))
   return facet_sweep_plot(p, sweep_vars)
 
 
@@ -220,15 +224,15 @@ def plot_regret_ave_scaling(df_in: pd.DataFrame,
   """Point plot of average regret investigating scaling to threshold."""
   df = _preprocess_ave_regret(df_in, group_col, episode, sweep_vars, regret_col)
   group_name = group_col.replace('_', ' ')
-  p = (gg.ggplot(df)
-       + gg.aes(x=group_name, y='average_regret',
-                colour='average_regret < {}'.format(regret_thresh))
-       + gg.geom_point(size=5, alpha=0.8)
-       + gg.scale_x_log10(breaks=[1, 3, 10, 30, 100])
-       + gg.scale_colour_manual(values=['#d73027', '#313695'])
-       + gg.ylab('average regret at {} episodes'.format(episode))
-       + gg.geom_hline(gg.aes(yintercept=0.0), alpha=0)  # axis hack
-      )
+  p = ((gg.ggplot(df) + gg.aes(
+      x=group_name,
+      y='average_regret',
+      colour=f'average_regret < {regret_thresh}',
+  )) + gg.geom_point(size=5, alpha=0.8) +
+       gg.scale_x_log10(breaks=[1, 3, 10, 30, 100]) +
+       gg.scale_colour_manual(values=['#d73027', '#313695']) +
+       gg.ylab(f'average regret at {episode} episodes') +
+       gg.geom_hline(gg.aes(yintercept=0.0), alpha=0))
   return facet_sweep_plot(p, sweep_vars)
 
 
@@ -239,11 +243,9 @@ def _make_unique_group_col(
   unique_vars = ['bsuite_id']
   if sweep_vars:
     unique_vars += sweep_vars
-  unique_group = (df[unique_vars].astype(str)
-                  .apply(lambda x: x.name + '=' + x, axis=0)
-                  .apply(lambda x: '\n'.join(x), axis=1)  # pylint:disable=unnecessary-lambda
-                 )
-  return unique_group
+  return (df[unique_vars].astype(str).apply(
+      lambda x: x.name + '=' + x, axis=0).apply(lambda x: '\n'.join(x), axis=1)  # pylint:disable=unnecessary-lambda
+          )
 
 
 def plot_individual_returns(
